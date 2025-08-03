@@ -1,0 +1,3 @@
+[submodule "shadelight"]
+	path = shadelight
+	url = https://github.com/PufyBee/Shadelight.git
