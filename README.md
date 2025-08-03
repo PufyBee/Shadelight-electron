@@ -140,11 +140,8 @@ npm run build
 
 - Tag releases, e.g., `git tag -a v0.1.0 -m "Initial UI"`  
 - Keep `node_modules/` and Python virtualenv out of version control.  
-- Consider adding CI to validate builds and backend integrity.
 
 ## License
-
-Specify the license used for the project. Example:
 
 ```text
 MIT License
