@@ -2,7 +2,7 @@
   "name": "shadelight-electron",
   "version": "0.2.0",
   "author": "PufyBee",
-  "main": "main.js",            
+  "main": "main.js",
   "productName": "Shadelight",
   "scripts": {
     "start": "electron .",
@@ -27,5 +27,8 @@
       "allowElevation": true,
       "allowToChangeInstallationDirectory": true
     }
+  },
+  "dependencies": {
+    "@electron/remote": "^2.1.3"
   }
 }
