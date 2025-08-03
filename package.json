@@ -1,0 +1,12 @@
+{
+  "name": "shadelight-electron",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "@electron/remote": "^2.1.3",
+    "electron": "^29.4.6"
+  }
+}

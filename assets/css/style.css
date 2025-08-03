@@ -1,0 +1,356 @@
+/* ======================================================
+   Core / Variables
+   ====================================================== */
+:root {
+  --purple-500: #7c3aed;
+  --purple-600: #6b46c1;
+  --purple-100: #f3ecff;
+  --text-default: #1f2937;
+  --text-muted: #6b7280;
+  --bg: #ffffff;
+}
+
+body, html {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: 500;
+  line-height: 1.4;
+  background: var(--bg);
+  color: var(--text-default);
+  margin: 0;
+  -webkit-user-select: none;
+  user-select: none;
+  overflow: hidden; /* prevent outer scrolling */
+}
+
+/* ======================================================
+   Header / Branding
+   ====================================================== */
+.drag-region h1 {
+  margin: 0;
+  color: var(--purple-600);
+  position: relative;
+  display: inline-block;
+}
+.drag-region h1::after {
+  content: "";
+  display: block;
+  height: 4px;
+  width: 50%;
+  background: linear-gradient(90deg, var(--purple-500), var(--purple-600));
+  border-radius: 2px;
+  margin-top: 4px;
+}
+.subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ======================================================
+   Buttons
+   ====================================================== */
+.btn {
+  background: var(--purple-500);
+  color: white;
+  padding: .65rem 1.1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: transform .1s ease, box-shadow .2s ease, background .2s ease;
+  min-width: 110px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.08);
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 32px -4px rgba(124, 58, 237, 0.25);
+  background: var(--purple-600);
+}
+.btn:hover::before {
+  opacity: 1;
+}
+.btn:active {
+  transform: translateY(0);
+}
+.btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  background: rgba(107, 52, 204, 0.4);
+}
+.btn.active, .btn:focus {
+  outline: 2px solid var(--purple-500);
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.4);
+}
+
+/* tertiary/coming soon */
+.btn.tertiary {
+  background: transparent;
+  color: var(--purple-600);
+  border: 1px solid var(--purple-500);
+}
+.btn.tertiary:disabled {
+  opacity: .4;
+  border-color: rgba(124,58,237,0.4);
+  color: rgba(124,58,237,0.4);
+}
+
+/* Filter buttons variant */
+.filter-btn {
+  background: transparent;
+  border: 1px solid rgba(124,58,237,0.3);
+  color: var(--purple-600);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease;
+}
+.filter-btn.active {
+  background: var(--purple-500);
+  color: white;
+  border-color: var(--purple-500);
+}
+.filter-btn:not(.active):hover {
+  background: rgba(124,58,237,0.08);
+}
+
+/* ======================================================
+   Window Controls
+   ====================================================== */
+.window-btn {
+  background: transparent;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s ease;
+  color: #4b5563;
+}
+.window-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+.window-btn.close:hover {
+  background: #f87171;
+  color: white;
+}
+.window-btn.minimize:hover {
+  background: #fcd34d;
+  color: #1f2937;
+}
+
+/* ======================================================
+   Progress
+   ====================================================== */
+.progress-container {
+  background: #ebe9f7;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 12px;
+  margin-top: 6px;
+}
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  transition: width .3s ease;
+  background: linear-gradient(90deg, #a78bfa, #7c3aed);
+}
+#progress-text {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  transition: color .2s ease;
+}
+#progress-text.active {
+  color: var(--purple-600);
+  font-weight: 600;
+}
+
+/* ======================================================
+   Summary Card
+   ====================================================== */
+.summary-card {
+  background: #f9f5ff;
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 16px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 32px -4px rgba(107, 70, 193, 0.08);
+}
+.summary-card.new {
+  animation: pop 0.45s ease;
+}
+@keyframes pop {
+  0% { transform: scale(.97); opacity: 0; }
+  60% { transform: scale(1.02); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge-success {
+  background: #d8f3e7;
+  color: #065f46;
+}
+.badge-danger {
+  background: #fde2e2;
+  color: #9f1f1f;
+}
+
+/* ======================================================
+   Logs & Entries
+   ====================================================== */
+/* Wrapper scrollbar styling left default hidden outer scroll handled elsewhere */
+.log-box-wrapper {
+  background: #f9f9fb;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 12px 14px;
+}
+.log-box {
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
+  font-family: "Fira Code", monospace;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0;
+  /* hide native scrollbars */
+  scrollbar-width: none; /* Firefox */
+}
+.log-box::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.log-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  background: white;
+  position: relative;
+  font-size: 13px;
+  line-height: 1.2;
+  word-break: break-word;
+  box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.04);
+}
+.log-ts {
+  color: #9ca3af;
+  flex-shrink: 0;
+  font-family: monospace;
+  margin-right: 4px;
+}
+.log-badge {
+  white-space: nowrap;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 6px;
+}
+.severity-info .log-badge {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+.severity-danger .log-badge {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.severity-neutral {
+  background: #f7f7fa;
+}
+.log-copy {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid rgba(124,58,237,0.5);
+  color: var(--purple-600);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: background .2s ease;
+  flex-shrink: 0;
+}
+.log-copy:hover {
+  background: rgba(124,58,237,0.08);
+}
+
+/* ======================================================
+   Banner messages
+   ====================================================== */
+.banner {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  display: inline-block;
+  opacity: 0;
+  transition: transform .3s ease, opacity .3s ease;
+  z-index: 1000;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 16px 48px -8px rgba(124,58,237,0.35);
+}
+.banner.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+.banner-info {
+  background: #eef4ff;
+  color: #3730a3;
+}
+.banner-warning {
+  background: #fff7ed;
+  color: #b45309;
+}
+.banner-danger {
+  background: #ffe3e3;
+  color: #991b1b;
+}
+
+/* ======================================================
+   Layout tweaks
+   ====================================================== */
+.left-panel {
+  padding-right: 12px;
+}
+@media (min-width: 768px) {
+  .left-panel {
+    min-width: 360px;
+  }
+}

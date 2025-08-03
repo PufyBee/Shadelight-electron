@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Shadelight</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Tailwind (optional utility fallback) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Custom stylesheet -->
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body class="p-6">
+  <!-- Header / Title Bar -->
+  <div class="flex justify-between items-center mb-4">
+    <div class="drag-region flex items-center gap-3">
+      <div>
+        <h1 class="text-2xl font-bold select-none">Shadelight</h1>
+        <div class="subtitle">Network &amp; Malware Scanner</div>
+      </div>
+    </div>
+    <div class="no-drag flex gap-2">
+      <button id="minimize" aria-label="Minimize" class="window-btn minimize">─</button>
+      <button id="close" aria-label="Close" class="window-btn close">✕</button>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- Left panel: actions + progress + summary -->
+    <div class="space-y-4 left-panel">
+      <div class="flex gap-3">
+        <button id="port-scan" class="btn">Port Scan</button>
+        <button id="malware-scan" class="btn">Malware Scan</button>
+        <button class="btn opacity-70 cursor-not-allowed" disabled>Coming Soon</button>
+      </div>
+
+      <div class="mt-2">
+        <div class="text-sm mb-1">Progress</div>
+        <div class="progress-container">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="progress-text" class="text-xs mt-1 text-gray-600">Idle</div>
+      </div>
+
+      <div class="summary-card" id="summary-card" style="display:none;">
+        <div>
+          <div class="text-lg font-semibold">Last Scan Summary</div>
+          <div class="text-sm text-gray-600" id="summary-detail">No scans run yet.</div>
+        </div>
+        <div class="ml-auto flex gap-2">
+          <div class="badge badge-success" id="open-ports-badge">0 Open Ports</div>
+          <div class="badge badge-danger" id="threats-badge">0 Threats</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right panel: filters + logs -->
+    <div class="flex flex-col">
+      <div class="flex gap-2 mb-2">
+        <button id="filter-all" class="btn small">All</button>
+        <button id="filter-info" class="btn small">Info</button>
+        <button id="filter-danger" class="btn small">Danger</button>
+      </div>
+
+      <div>
+        <div class="text-sm font-medium mb-1">Logs</div>
+        <div class="log-box-wrapper">
+          <div id="log-box" class="log-box">
+            <div class="severity-neutral">
+              Welcome to Shadelight. Click “Port Scan” or “Malware Scan” to begin.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
