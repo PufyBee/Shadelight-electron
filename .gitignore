@@ -12,3 +12,6 @@ Thumbs.db
 "*.csv"           
 "*.html"          
 "shadelight_backend.exe" 
+*.csv          
+*.html         
+shadelight_backend.exe 
