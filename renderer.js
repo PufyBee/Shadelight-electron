@@ -1,5 +1,88 @@
-const { exec } = require('child_process');
-const remote = require('@electron/remote');
+// ───────────────────────────
+// renderer.js (top of file)
+// ───────────────────────────
+
+// Core modules
+const { dialog } = require('@electron/remote');
+const { exec }    = require('child_process');
+const remote      = require('@electron/remote');
+const { app }     = remote;
+const path        = require('path');
+const fs          = require('fs');
+
+// ───────────────────────────
+// Compute absolute paths based on app root + sibling Python backend
+// ───────────────────────────
+
+// `appRoot` is where package.json lives: 
+//   C:\Users\Puffy\shadelight-electron\shadelight-electron
+const appRoot    = app.getAppPath();
+
+// Move up one folder (out of the electron folder) into the Python backend root:
+const pythonBase = path.resolve(appRoot, '..', 'shadelight');
+
+// Paths under pythonBase\shadelight\
+const pythonExe      = path.join(pythonBase, 'venv', 'Scripts', 'python.exe');
+const scannerDir     = path.join(pythonBase, 'shadelight');
+const sigScannerPath = path.join(scannerDir, 'signature_scan.py');
+const targetFile     = path.join(scannerDir, 'testfile.txt');
+const signatureResultPath = path.join(scannerDir, 'signature_scan_result_structured.json');
+
+// ───────────────────────────
+
+async function chooseTarget() {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    title: 'Select file or folder to scan',
+    properties: ['openFile', 'openDirectory']
+  });
+  if (canceled || filePaths.length === 0) return null;
+  return filePaths[0];
+}
+
+// Load the structured signature scan result JSON
+function loadSignatureScanResult() {
+  if (!fs.existsSync(signatureResultPath)) return null;
+  try {
+    const raw = fs.readFileSync(signatureResultPath, "utf-8");
+    return JSON.parse(raw); // Array of detections
+  } catch (e) {
+    console.error("Failed to parse signature scan result:", e);
+    return null;
+  }
+}
+
+// Display signature detections into log and return count of threats
+function displaySignatureFindings() {
+  const results = loadSignatureScanResult();
+  if (!results || results.length === 0) {
+    log("No signature-based threats detected.", "info");
+    return 0;
+  }
+
+  let threatCount = 0;
+  results.forEach(r => {
+    const file = r.path.split(/[/\\]/).pop();
+    const level = r.risk.level; // High / Medium / Low
+    const score = r.risk.score;
+    const reasons = r.risk.reasons || [];
+    const exactName = r.exact_match?.name || "(unknown)";
+
+    // Log summary line
+    const severityTag = level === "High" ? "danger" : level === "Medium" ? "info" : "neutral";
+    log(`Signature scan: ${file} - Risk: ${level} (score ${score})`, severityTag);
+    reasons.forEach(reason => {
+      log(`  • ${reason}`, "neutral");
+    });
+
+    if (level === "High" || level === "Medium") threatCount += 1;
+  });
+  return threatCount;
+}
+
+// Determine backend executable (bundled) or fallback
+const backendExe = process.platform === 'win32'
+  ? path.join(__dirname, 'shadelight_backend.exe')
+  : 'python -m shadelight'; // fallback for non-Windows/dev
 
 // --- UI Elements ---
 const portBtn = document.getElementById('port-scan');
@@ -14,7 +97,7 @@ const threatsBadge = document.getElementById('threats-badge');
 const minimizeBtn = document.getElementById('minimize');
 const closeBtn = document.getElementById('close');
 
-//---- Auto Log----
+// ---- Auto Log ----
 console.log("Renderer.js loaded - version with active state and summary animation");
 
 // --- Window Controls ---
@@ -73,7 +156,6 @@ function log(message, severity = 'neutral', options = {}) {
   logBox.appendChild(entry);
   logBox.scrollTop = logBox.scrollHeight;
 }
-
 
 // Classify severity based on markers or content heuristics
 function classifySeverity(line) {
@@ -138,54 +220,80 @@ function clearActiveStates() {
 }
 
 // --- Scan logic ---
-function startMalwareScan() {
+async function startMalwareScan() {
+  const userTarget = await chooseTarget();
+  if (!userTarget) {
+    log('No target selected.', 'info');
+    return;
+  }
+
+  // ← HERE: clear previous results
+  if (fs.existsSync(signatureResultPath)) {
+    try { fs.unlinkSync(signatureResultPath); }
+    catch (e) { console.warn("Could not delete old signature JSON:", e); }
+  }
+
   clearActiveStates();
   malwareBtn.classList.add('active');
+  // …
+
   disableButtons();
   log('Starting malware scan...', 'info');
   startFakeProgress('Malware Scan');
 
-  const command = `python -m shadelight 127.0.0.1/32 --ports 0 --signature-scan "./samples"`;
+  // 3. Build and log the command using the user’s choice
+  const command = `"${pythonExe}" "${sigScannerPath}" "${userTarget}"`;
+  log(`Running command: ${command}`, 'info');
 
+  // 4. Execute the scanner
   exec(command, (error, stdout, stderr) => {
     completeProgress();
     clearActiveStates();
+
+    let threats = 0;
+
     if (error) {
       log(`Error: ${error.message}`, 'danger');
     }
     if (stderr) {
-      stderr
-        .split('\n')
-        .filter(Boolean)
-        .forEach(line => log(line, classifySeverity(line)));
+      stderr.split('\n')
+            .filter(Boolean)
+            .forEach(line => log(line, classifySeverity(line)));
     }
-
-    let threats = 0;
     if (stdout) {
-      stdout
-        .split('\n')
-        .filter(Boolean)
-        .forEach(line => {
-          const sev = classifySeverity(line);
-          log(line, sev);
-          if (line.toLowerCase().includes('threat') || line.includes('[DANGER]')) threats += 1;
-        });
+      stdout.split('\n')
+            .filter(Boolean)
+            .forEach(line => {
+              const sev = classifySeverity(line);
+              log(line, sev);
+              if (line.toLowerCase().includes('threat') || line.includes('[DANGER]')) {
+                threats += 1;
+              }
+            });
     }
 
+    // 5. Show the signature-based findings from the JSON
+    const signatureThreats = displaySignatureFindings();
+    threats += signatureThreats;
+
+    // 6. Update the summary and re-enable buttons
     updateSummary({ openPorts: 0, threats, type: 'Malware Scan' });
     enableButtons();
   });
 }
 
-document.getElementById('filter-all').addEventListener('click', () => {
+
+
+
+document.getElementById('filter-all')?.addEventListener('click', () => {
   document.querySelectorAll('.log-entry').forEach(e => (e.style.display = 'flex'));
 });
-document.getElementById('filter-info').addEventListener('click', () => {
+document.getElementById('filter-info')?.addEventListener('click', () => {
   document.querySelectorAll('.log-entry').forEach(e => {
     e.style.display = e.classList.contains('severity-info') ? 'flex' : 'none';
   });
 });
-document.getElementById('filter-danger').addEventListener('click', () => {
+document.getElementById('filter-danger')?.addEventListener('click', () => {
   document.querySelectorAll('.log-entry').forEach(e => {
     e.style.display = e.classList.contains('severity-danger') ? 'flex' : 'none';
   });
@@ -217,7 +325,7 @@ function startPortScan() {
   function scanPort(portIndex) {
     const port = ports[portIndex];
     log(`Scanning port ${port}...`, 'info');
-    const cmd = `python -m shadelight 127.0.0.1/32 --ports ${port}`;
+    const cmd = `"${backendExe}" 127.0.0.1/32 --ports ${port}`;
 
     exec(cmd, (error, stdout, stderr) => {
       if (error) {
