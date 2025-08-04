@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 
 // Enable remote module
@@ -16,7 +16,7 @@ function createWindow() {
     frame: false, // Frameless window
     transparent: false,
     resizable: false, // fixed size
-    icon: path.join(__dirname, 'assets', 'icons', 'logo.ico'), // custom icon for Windows/Linux
+    icon: path.join(__dirname, 'assets', 'icons', 'logo.ico'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -27,19 +27,9 @@ function createWindow() {
   // Enable remote in renderer
   remoteMain.enable(win.webContents);
 
-  // Uncomment for debugging to open DevTools on launch
-  // win.webContents.openDevTools({ mode: 'detach' });
-
-  // On macOS, set the dock icon explicitly if you have an .icns version too
-  if (process.platform === 'darwin') {
-    const { nativeImage } = require('electron');
-    const dockIcon = nativeImage.createFromPath(
-      path.join(__dirname, 'assets', 'icons', 'logo.icns')
-    );
-    if (!dockIcon.isEmpty()) {
-      app.dock.setIcon(dockIcon);
-    }
-  }
+  // Optional: expose basic window controls via IPC (fallback if you remove @electron/remote later)
+  ipcMain.handle('window-minimize', () => win.minimize());
+  ipcMain.handle('window-close', () => win.close());
 
   // Load the HTML
   win.loadFile('index.html');
