@@ -12,7 +12,14 @@ Provides an Electron-based interface with styled logs, scan summary, and actiona
 - Banner notifications (e.g., insecure service warnings)  
 - Foundation for future extensions (vulnerability hints, AI integration)
 
-## Quickstart (development)
+## Quickstart (Docker) 
+
+[![Docker Pulls](https://img.shields.io/docker/pulls/samaharrison/shadelight-scanner)](https://hub.docker.com/r/samaharrison/shadelight-scanner)
+
+```bash
+docker pull samaharrison/shadelight-scanner:latest
+docker run --rm -v /path/to/files:/data \
+  samaharrison/shadelight-scanner:latest /data
 
 ### Prerequisites
 
